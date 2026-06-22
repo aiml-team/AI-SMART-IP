@@ -1,0 +1,638 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: analyze
+    description: AI transcript analysis operations
+  - name: catalog
+    description: IP catalog management
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /analyze:
+    post:
+      operationId: analyzeTranscript
+      tags: [analyze]
+      summary: Analyze a meeting transcript
+      description: Extracts insights from a transcript and returns top 3 IP recommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeRequest"
+      responses:
+        "200":
+          description: Analysis results with insights and recommendations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyzeResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /analyze/email-pitch:
+    post:
+      operationId: generateEmailPitch
+      tags: [analyze]
+      summary: Generate an email pitch for a recommendation
+      description: Generates a ready-to-send email pitch for a specific IP recommendation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailPitchRequest"
+      responses:
+        "200":
+          description: Generated email pitch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailPitchResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /catalog:
+    get:
+      operationId: getIpCatalog
+      tags: [catalog]
+      summary: Get the full IP catalog
+      description: Returns all IPs in the catalog
+      responses:
+        "200":
+          description: List of all IPs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpCatalogResponse"
+    post:
+      operationId: createIpEntry
+      tags: [catalog]
+      summary: Create a new IP entry
+      description: Adds a new IP solution to the catalog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIpRequest"
+      responses:
+        "201":
+          description: IP created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpItem"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /catalog/upload:
+    post:
+      operationId: uploadIpCatalog
+      tags: [catalog]
+      summary: Upload IPs from Excel
+      description: Parses an Excel file and adds all valid rows as IP entries
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        "200":
+          description: Upload results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadIpResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /catalog/{id}:
+    delete:
+      operationId: deleteIpEntry
+      tags: [catalog]
+      summary: Delete an IP entry
+      description: Permanently removes an IP entry from the catalog
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      operationId: getIpById
+      tags: [catalog]
+      summary: Get a single IP entry
+      description: Returns the full details of a specific IP by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: IP entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpItem"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateIpEntry
+      tags: [catalog]
+      summary: Update an existing IP entry
+      description: Replaces all fields of an existing IP entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIpRequest"
+      responses:
+        "200":
+          description: Updated IP entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpItem"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /catalog/{id}/documents:
+    get:
+      operationId: getIpDocuments
+      tags: [catalog]
+      summary: List documents for an IP
+      description: Returns metadata for all uploaded documents for a specific IP
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpDocumentsResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: uploadIpDocument
+      tags: [catalog]
+      summary: Upload a document for an IP
+      description: Attaches a file (PDF, DOCX, etc.) to a specific IP entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        "201":
+          description: Document uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpDocument"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: IP not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /catalog/{id}/documents/{docId}:
+    delete:
+      operationId: deleteIpDocument
+      tags: [catalog]
+      summary: Delete a document from an IP
+      description: Removes an uploaded document from the IP
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    AnalyzeRequest:
+      type: object
+      properties:
+        transcript:
+          type: string
+          description: The meeting transcript text to analyze
+      required:
+        - transcript
+    InsightsResult:
+      type: object
+      properties:
+        businessProblems:
+          type: array
+          items:
+            type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        sapModules:
+          type: array
+          items:
+            type: string
+        industry:
+          type: string
+      required:
+        - businessProblems
+        - keywords
+        - sapModules
+        - industry
+    IpRecommendation:
+      type: object
+      properties:
+        ipId:
+          type: string
+        ipName:
+          type: string
+        score:
+          type: number
+          description: Match score between 0 and 100
+        reason:
+          type: string
+          description: AI-generated explanation of why this IP is relevant
+        pitch:
+          type: string
+          description: Customer-ready sales pitch
+        implementationEffort:
+          type: string
+        maturityLevel:
+          type: string
+      required:
+        - ipId
+        - ipName
+        - score
+        - reason
+        - pitch
+        - implementationEffort
+        - maturityLevel
+    AnalyzeResponse:
+      type: object
+      properties:
+        insights:
+          $ref: "#/components/schemas/InsightsResult"
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/IpRecommendation"
+      required:
+        - insights
+        - recommendations
+    EmailPitchRequest:
+      type: object
+      properties:
+        ipName:
+          type: string
+        customerContext:
+          type: string
+          description: Brief context about the customer for personalizing the email
+        reason:
+          type: string
+          description: Why this IP is relevant to the customer
+      required:
+        - ipName
+        - customerContext
+        - reason
+    EmailPitchResponse:
+      type: object
+      properties:
+        subject:
+          type: string
+        body:
+          type: string
+      required:
+        - subject
+        - body
+    IpItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        businessProblems:
+          type: array
+          items:
+            type: string
+        industries:
+          type: array
+          items:
+            type: string
+        sapModules:
+          type: array
+          items:
+            type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        triggerSignals:
+          type: array
+          items:
+            type: string
+        valueProposition:
+          type: string
+        pitch:
+          type: string
+        differentiators:
+          type: string
+        implementationEffort:
+          type: string
+        maturityLevel:
+          type: string
+      required:
+        - id
+        - name
+        - description
+        - businessProblems
+        - industries
+        - sapModules
+        - keywords
+        - triggerSignals
+        - valueProposition
+        - pitch
+        - differentiators
+        - implementationEffort
+        - maturityLevel
+    CreateIpRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        businessProblems:
+          type: array
+          items:
+            type: string
+        industries:
+          type: array
+          items:
+            type: string
+        sapModules:
+          type: array
+          items:
+            type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        triggerSignals:
+          type: array
+          items:
+            type: string
+        valueProposition:
+          type: string
+        pitch:
+          type: string
+        differentiators:
+          type: string
+        implementationEffort:
+          type: string
+        maturityLevel:
+          type: string
+      required:
+        - name
+        - description
+        - businessProblems
+        - industries
+        - sapModules
+        - keywords
+        - triggerSignals
+        - valueProposition
+        - pitch
+        - differentiators
+        - implementationEffort
+        - maturityLevel
+    UploadIpResponse:
+      type: object
+      properties:
+        added:
+          type: number
+          description: Number of IPs successfully added
+        skipped:
+          type: number
+          description: Number of rows skipped due to errors
+        errors:
+          type: array
+          items:
+            type: string
+          description: List of error messages for skipped rows
+      required:
+        - added
+        - skipped
+        - errors
+    IpCatalogResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/IpItem"
+      required:
+        - items
+    IpDocument:
+      type: object
+      properties:
+        id:
+          type: string
+        originalName:
+          type: string
+        size:
+          type: number
+          description: File size in bytes
+        uploadedAt:
+          type: string
+          description: ISO timestamp of when the document was uploaded
+        mimeType:
+          type: string
+      required:
+        - id
+        - originalName
+        - size
+        - uploadedAt
+        - mimeType
+    IpDocumentsResponse:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: "#/components/schemas/IpDocument"
+      required:
+        - documents
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message

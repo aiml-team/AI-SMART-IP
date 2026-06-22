@@ -1,0 +1,252 @@
+Build a full-stack web application called **"AI IP Recommendation Copilot"**.
+
+## 🎯 Objective
+
+This application helps SAP sales and consulting teams identify the most relevant Intellectual Property (IP) solutions based on customer conversations.
+
+The app should:
+
+* Accept a meeting transcript (text or .vtt file)
+* Analyze it using AI (LLM)
+* Extract business problems, SAP context, and keywords
+* Match against an IP catalog
+* Recommend the **Top 3 most relevant IPs**
+* Provide explanation + ready-to-use sales pitch
+
+---
+
+## 🧠 Key Concept
+
+This is NOT just keyword matching.
+
+This is a **mini RAG (Retrieval Augmented Generation) system**:
+
+1. Extract insights from transcript
+2. Match with structured IP catalog
+3. Use LLM reasoning to recommend best IPs
+
+---
+
+## 🧱 Tech Stack
+
+Frontend:
+
+* React (simple functional UI)
+* Clean minimal styling (no heavy frameworks required)
+
+Backend:
+
+* Node.js with Express
+
+AI:
+
+* OpenAI API (GPT-4 or equivalent)
+* Use prompt-based extraction + reasoning
+
+Storage:
+
+* Load IP catalog from JSON file (provided below)
+
+---
+
+## 📂 Project Structure
+
+* /frontend (React app)
+* /backend (Node.js API)
+* /data/ip_catalog.json
+
+---
+
+## 📦 IP Catalog
+
+Create a JSON file with at least 5 IPs using this structure:
+
+{
+"id": "IP001",
+"name": "Invoice Automation Accelerator",
+"description": "...",
+"businessProblems": ["..."],
+"industries": ["..."],
+"sapModules": ["..."],
+"keywords": ["..."],
+"triggerSignals": ["..."],
+"valueProposition": "...",
+"pitch": "...",
+"differentiators": "...",
+"implementationEffort": "Medium",
+"maturityLevel": "Mature"
+}
+
+Populate with realistic dummy SAP-related IPs:
+
+* Invoice Automation
+* Predictive Maintenance
+* Procurement AI Assistant
+* Finance Close Automation
+* Customer Service Automation
+
+---
+
+## ⚙️ Backend API Design
+
+### POST /analyze
+
+Input:
+{
+"transcript": "string"
+}
+
+Output:
+{
+"insights": {
+"businessProblems": [],
+"keywords": [],
+"sapModules": [],
+"industry": ""
+},
+"recommendations": [
+{
+"ipName": "",
+"score": 0,
+"reason": "",
+"pitch": ""
+}
+]
+}
+
+---
+
+## 🧠 AI LOGIC (IMPORTANT)
+
+### Step 1: Extract Insights from Transcript
+
+Call OpenAI with this prompt:
+
+"Analyze the following customer meeting transcript and extract:
+
+1. Key business problems
+2. SAP modules or technologies mentioned
+3. Business keywords
+4. Industry (if possible)
+
+Return ONLY valid JSON with keys:
+businessProblems, keywords, sapModules, industry
+
+Transcript:
+{{transcript}}"
+
+---
+
+### Step 2: IP Matching Logic
+
+Implement scoring logic (no need for embeddings in MVP):
+
+Score each IP based on:
+
+* Keyword overlap (40%)
+* Business problem similarity (30%)
+* SAP module match (20%)
+* Industry match (10%)
+
+Return top 3 IPs.
+
+---
+
+### Step 3: LLM Recommendation Reasoning
+
+Call OpenAI again:
+
+"Given the extracted insights and the following IP candidates, explain why each IP is relevant.
+
+Return for each:
+
+* reason (clear explanation)
+* pitch (customer-ready message)"
+
+---
+
+## 🖥️ Frontend UI
+
+### Layout:
+
+1. Text Area:
+
+   * Paste transcript OR upload file
+
+2. Button:
+
+   * "Analyze Conversation"
+
+3. Insights Section:
+
+   * Show extracted problems, keywords, SAP modules
+
+4. Recommendations Section:
+   Show top 3 IPs with:
+
+   * IP Name
+   * Match Score
+   * Why it matches
+   * Suggested Pitch
+   * Copy button
+
+---
+
+## ✨ UX Enhancements
+
+* Show loading spinner during AI processing
+* Highlight detected keywords
+* Clean card layout for recommendations
+
+---
+
+## 🧪 Sample Transcript
+
+"Customer is struggling with manual invoice processing. They mentioned high workload in accounts payable and are exploring SAP BTP automation solutions."
+
+---
+
+## 🚀 Advanced Features (If Time Permits)
+
+* Add "Generate Email Pitch" button
+* Allow uploading .vtt files
+* Add "confidence score"
+* Add ability to view full IP details
+
+---
+
+## ⚠️ Important Guidelines
+
+* Keep code modular and clean
+* Separate AI logic into a service layer
+* Handle errors gracefully
+* Ensure JSON parsing is robust
+* Do not hardcode results
+
+---
+
+## 🧠 Future-Ready Design (Important for extensibility)
+
+Even though MVP is simple, structure code so that later we can:
+
+* Replace keyword matching with embeddings
+* Add vector database (e.g., SAP HANA Cloud Vector Engine)
+* Integrate CRM systems
+* Add real-time recommendations
+
+---
+
+## 🎯 End Goal
+
+A working demo where:
+User pastes transcript → clicks analyze → sees:
+
+* Extracted insights
+* Top 3 IP recommendations
+* Clear reasoning + pitch
+
+This should feel like an **AI Copilot for SAP deal support**, not just a basic tool.
+
+---
+
+Build the full working app with both frontend and backend, including sample data and clear instructions to run locally.

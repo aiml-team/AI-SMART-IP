@@ -1,0 +1,185 @@
+[
+  {
+    "id": "IP001",
+    "name": "Invoice Automation Accelerator",
+    "description": "Automates invoice processing using OCR and SAP Document AI",
+    "businessProblems": [
+      "High manual invoice processing",
+      "Data entry errors",
+      "Delayed vendor payments"
+    ],
+    "industries": [
+      "Manufacturing",
+      "Retail",
+      "Pharma"
+    ],
+    "sapModules": [
+      "SAP S/4HANA",
+      "SAP BTP",
+      "SAP Document AI"
+    ],
+    "keywords": [
+      "invoice",
+      "OCR",
+      "accounts payable",
+      "automation",
+      "finance"
+    ],
+    "triggerSignals": [
+      "manual invoices",
+      "AP workload",
+      "paper-based processes"
+    ],
+    "valueProposition": "Reduce effort by 60%; Improve accuracy to 95%+",
+    "pitch": "We have a pre-built accelerator using SAP Document AI to automate invoice processing. This can reduce your AP team's manual effort by 60% while achieving 95%+ accuracy — deployable in under 6 weeks.",
+    "differentiators": "Pre-trained models; Fast deployment (<6 weeks)",
+    "implementationEffort": "Medium",
+    "maturityLevel": "Mature"
+  },
+  {
+    "id": "IP002",
+    "name": "Predictive Maintenance Engine",
+    "description": "AI-driven predictive maintenance using IoT and ML",
+    "businessProblems": [
+      "Unplanned downtime",
+      "High maintenance cost",
+      "Reactive maintenance"
+    ],
+    "industries": [
+      "Manufacturing",
+      "Utilities"
+    ],
+    "sapModules": [
+      "SAP IoT",
+      "SAP BTP",
+      "SAP Asset Management"
+    ],
+    "keywords": [
+      "predictive maintenance",
+      "downtime",
+      "sensors",
+      "machine failure",
+      "IoT",
+      "asset management"
+    ],
+    "triggerSignals": [
+      "machine breakdown",
+      "high maintenance cost",
+      "lack of insights"
+    ],
+    "valueProposition": "Reduce downtime by 30%; Extend asset life",
+    "pitch": "Our Predictive Maintenance Engine detects failures before they happen using real-time IoT sensor data and pre-built ML models on SAP BTP — helping you reduce unplanned downtime by up to 30%.",
+    "differentiators": "Real-time monitoring; Prebuilt ML models",
+    "implementationEffort": "High",
+    "maturityLevel": "Mature"
+  },
+  {
+    "id": "IP003",
+    "name": "Intelligent Procurement Assistant",
+    "description": "AI assistant to automate sourcing and supplier selection",
+    "businessProblems": [
+      "Manual sourcing",
+      "Inefficient supplier selection",
+      "Lack of visibility"
+    ],
+    "industries": [
+      "All industries"
+    ],
+    "sapModules": [
+      "SAP Ariba",
+      "SAP BTP"
+    ],
+    "keywords": [
+      "procurement",
+      "sourcing",
+      "suppliers",
+      "automation",
+      "Ariba",
+      "purchasing"
+    ],
+    "triggerSignals": [
+      "sourcing delays",
+      "supplier challenges"
+    ],
+    "valueProposition": "Reduce sourcing cycle by 40%",
+    "pitch": "Our AI-powered Procurement Assistant helps identify the best suppliers faster by automating sourcing workflows in SAP Ariba — cutting your sourcing cycle by 40% and improving supplier quality.",
+    "differentiators": "AI recommendations; Ariba integration",
+    "implementationEffort": "Medium",
+    "maturityLevel": "MVP"
+  },
+  {
+    "id": "IP004",
+    "name": "Finance Close Automation Suite",
+    "description": "Automates financial close and reconciliation processes",
+    "businessProblems": [
+      "Long closing cycles",
+      "Manual reconciliation",
+      "Compliance risks"
+    ],
+    "industries": [
+      "All industries"
+    ],
+    "sapModules": [
+      "SAP S/4HANA Finance",
+      "SAP BTP"
+    ],
+    "keywords": [
+      "financial close",
+      "reconciliation",
+      "reporting",
+      "automation",
+      "compliance",
+      "month-end"
+    ],
+    "triggerSignals": [
+      "month-end delays",
+      "manual reconciliation"
+    ],
+    "valueProposition": "Reduce closing time by 50%",
+    "pitch": "Accelerate your financial close with our pre-built automation suite that handles reconciliation and reporting — reducing close time by 50% while ensuring compliance and real-time visibility.",
+    "differentiators": "Prebuilt workflows; Compliance-ready",
+    "implementationEffort": "Medium",
+    "maturityLevel": "Mature"
+  },
+  {
+    "id": "IP005",
+    "name": "Customer Service Automation Platform",
+    "description": "AI-powered customer service automation with intelligent case routing and resolution",
+    "businessProblems": [
+      "High customer service workload",
+      "Long resolution times",
+      "Inconsistent customer experience",
+      "Agent burnout"
+    ],
+    "industries": [
+      "Retail",
+      "Telecom",
+      "Banking",
+      "Insurance"
+    ],
+    "sapModules": [
+      "SAP CX",
+      "SAP BTP",
+      "SAP Service Cloud"
+    ],
+    "keywords": [
+      "customer service",
+      "chatbot",
+      "case management",
+      "automation",
+      "CRM",
+      "support"
+    ],
+    "triggerSignals": [
+      "high ticket volume",
+      "customer complaints",
+      "agent workload",
+      "SLA breaches"
+    ],
+    "valueProposition": "Automate 40% of customer inquiries; Reduce resolution time by 35%",
+    "pitch": "Our Customer Service Automation Platform intelligently routes, prioritizes, and resolves customer cases using AI — automating 40% of inquiries and cutting resolution times by 35% on SAP Service Cloud.",
+    "differentiators": "Prebuilt intent models; SAP CX native integration; Multi-channel support",
+    "implementationEffort": "Medium",
+    "maturityLevel": "Mature"
+  }
+]
