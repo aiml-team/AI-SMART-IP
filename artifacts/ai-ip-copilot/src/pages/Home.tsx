@@ -236,9 +236,9 @@ export default function Home() {
                       {uploadedFiles.map((f) => (
                         <div
                           key={f.id}
-                          className="flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full px-2.5 py-0.5 text-xs font-medium max-w-[220px]"
+                          className="flex items-center gap-1.5 bg-secondary text-foreground border border-border rounded-full px-2.5 py-0.5 text-xs font-medium max-w-[220px]"
                         >
-                          <FileVideo2 className="w-3 h-3 shrink-0" />
+                          <FileVideo2 className="w-3 h-3 shrink-0 text-muted-foreground" />
                           <span className="truncate" title={f.name}>
                             {f.name}
                           </span>
@@ -248,7 +248,7 @@ export default function Home() {
                               e.stopPropagation();
                               removeFile(f.id);
                             }}
-                            className="ml-0.5 rounded-full hover:bg-primary/20 p-0.5 transition-colors shrink-0"
+                            className="ml-0.5 rounded-full hover:bg-foreground/10 p-0.5 transition-colors shrink-0"
                             aria-label={`Remove ${f.name}`}
                           >
                             <X className="w-2.5 h-2.5" />
@@ -314,12 +314,16 @@ export default function Home() {
 
               {/* ── Consolidation notice (when >1 files) ── */}
               {uploadedFiles.length > 1 && (
-                <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5 text-xs text-blue-700">
-                  <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-blue-500" />
+                <div className="flex items-start gap-2 bg-muted border border-border rounded-lg px-3 py-2.5 text-xs text-muted-foreground">
+                  <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
                   <span>
-                    All <strong>{uploadedFiles.length} files</strong> will be
-                    consolidated into a single analysis to surface insights and
-                    IP recommendations across the full conversation.
+                    All{" "}
+                    <strong className="text-foreground">
+                      {uploadedFiles.length} files
+                    </strong>{" "}
+                    will be consolidated into a single analysis to surface
+                    insights and IP recommendations across the full
+                    conversation.
                   </span>
                 </div>
               )}

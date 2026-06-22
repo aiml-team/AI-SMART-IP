@@ -26,7 +26,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { UploadCloud, FileSpreadsheet, Loader2, CheckCircle, AlertCircle, PlusCircle } from "lucide-react";
+import {
+  UploadCloud,
+  FileSpreadsheet,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  PlusCircle,
+} from "lucide-react";
 
 interface CreateIpDialogProps {
   open: boolean;
@@ -70,7 +77,11 @@ function FieldRow({
     <div className="grid gap-1.5">
       <Label className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">
         {label}
-        {hint && <span className="ml-1 text-[10px] text-muted-foreground font-normal normal-case">{hint}</span>}
+        {hint && (
+          <span className="ml-1 text-[10px] text-muted-foreground font-normal normal-case">
+            {hint}
+          </span>
+        )}
       </Label>
       {children}
     </div>
@@ -92,12 +103,18 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
   const createIp = useCreateIpEntry();
   const uploadIp = useUploadIpCatalog();
 
-  const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const set =
+    (key: keyof FormState) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const handleCreate = () => {
     if (!form.name.trim() || !form.description.trim()) {
-      toast({ title: "Required fields missing", description: "Name and description are required.", variant: "destructive" });
+      toast({
+        title: "Required fields missing",
+        description: "Name and description are required.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -120,15 +137,24 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
       },
       {
         onSuccess: () => {
-          toast({ title: "IP Created", description: `"${form.name}" has been added to the catalog.` });
-          queryClient.invalidateQueries({ queryKey: getGetIpCatalogQueryKey() });
+          toast({
+            title: "IP Created",
+            description: `"${form.name}" has been added to the catalog.`,
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetIpCatalogQueryKey(),
+          });
           setForm(EMPTY_FORM);
           onOpenChange(false);
         },
         onError: (err) => {
-          toast({ title: "Failed to create IP", description: err.message, variant: "destructive" });
+          toast({
+            title: "Failed to create IP",
+            description: err.message,
+            variant: "destructive",
+          });
         },
-      }
+      },
     );
   };
 
@@ -142,7 +168,11 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
 
   const handleUpload = () => {
     if (!uploadFile) {
-      toast({ title: "No file selected", description: "Please select an Excel file first.", variant: "destructive" });
+      toast({
+        title: "No file selected",
+        description: "Please select an Excel file first.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -151,15 +181,24 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
       {
         onSuccess: (result) => {
           setUploadResult(result);
-          queryClient.invalidateQueries({ queryKey: getGetIpCatalogQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getGetIpCatalogQueryKey(),
+          });
           if (result.added > 0) {
-            toast({ title: "Upload Complete", description: `${result.added} IP(s) added to the catalog.` });
+            toast({
+              title: "Upload Complete",
+              description: `${result.added} IP(s) added to the catalog.`,
+            });
           }
         },
         onError: (err) => {
-          toast({ title: "Upload Failed", description: err.message, variant: "destructive" });
+          toast({
+            title: "Upload Failed",
+            description: err.message,
+            variant: "destructive",
+          });
         },
-      }
+      },
     );
   };
 
@@ -193,7 +232,10 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
       "Mature",
     ];
 
-    const csv = [headers.join(","), exampleRow.map((v) => `"${v}"`).join(",")].join("\n");
+    const csv = [
+      headers.join(","),
+      exampleRow.map((v) => `"${v}"`).join(","),
+    ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -212,7 +254,8 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
             Add IP Solution
           </DialogTitle>
           <DialogDescription>
-            Add a new IP solution to the catalog using the form below or by uploading an Excel file.
+            Add a new IP solution to the catalog using the form below or by
+            uploading an Excel file.
           </DialogDescription>
         </DialogHeader>
 
@@ -226,7 +269,11 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
           <TabsContent value="form" className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
               <FieldRow label="Name *">
-                <Input placeholder="e.g. Invoice Automation Accelerator" value={form.name} onChange={set("name")} />
+                <Input
+                  placeholder="e.g. Invoice Automation Accelerator"
+                  value={form.name}
+                  onChange={set("name")}
+                />
               </FieldRow>
 
               <FieldRow label="Description *">
@@ -243,7 +290,9 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
                 <FieldRow label="Implementation Effort">
                   <Select
                     value={form.implementationEffort}
-                    onValueChange={(v) => setForm((f) => ({ ...f, implementationEffort: v }))}
+                    onValueChange={(v) =>
+                      setForm((f) => ({ ...f, implementationEffort: v }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -259,7 +308,9 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
                 <FieldRow label="Maturity Level">
                   <Select
                     value={form.maturityLevel}
-                    onValueChange={(v) => setForm((f) => ({ ...f, maturityLevel: v }))}
+                    onValueChange={(v) =>
+                      setForm((f) => ({ ...f, maturityLevel: v }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -273,7 +324,10 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
                 </FieldRow>
               </div>
 
-              <FieldRow label="Business Problems" hint="(comma or newline separated)">
+              <FieldRow
+                label="Business Problems"
+                hint="(comma or newline separated)"
+              >
                 <Textarea
                   placeholder="Manual invoice processing, Data entry errors, ..."
                   value={form.businessProblems}
@@ -284,23 +338,46 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
               </FieldRow>
 
               <FieldRow label="Industries" hint="(comma separated)">
-                <Input placeholder="Manufacturing, Retail, All industries" value={form.industries} onChange={set("industries")} />
+                <Input
+                  placeholder="Manufacturing, Retail, All industries"
+                  value={form.industries}
+                  onChange={set("industries")}
+                />
               </FieldRow>
 
               <FieldRow label="SAP Modules" hint="(comma separated)">
-                <Input placeholder="SAP S/4HANA, SAP BTP, SAP Document AI" value={form.sapModules} onChange={set("sapModules")} />
+                <Input
+                  placeholder="SAP S/4HANA, SAP BTP, SAP Document AI"
+                  value={form.sapModules}
+                  onChange={set("sapModules")}
+                />
               </FieldRow>
 
               <FieldRow label="Keywords" hint="(comma separated)">
-                <Input placeholder="invoice, OCR, automation, finance" value={form.keywords} onChange={set("keywords")} />
+                <Input
+                  placeholder="invoice, OCR, automation, finance"
+                  value={form.keywords}
+                  onChange={set("keywords")}
+                />
               </FieldRow>
 
-              <FieldRow label="Trigger Signals" hint="(comma separated — phrases that indicate a fit)">
-                <Input placeholder="manual invoices, AP workload, paper-based processes" value={form.triggerSignals} onChange={set("triggerSignals")} />
+              <FieldRow
+                label="Trigger Signals"
+                hint="(comma separated — phrases that indicate a fit)"
+              >
+                <Input
+                  placeholder="manual invoices, AP workload, paper-based processes"
+                  value={form.triggerSignals}
+                  onChange={set("triggerSignals")}
+                />
               </FieldRow>
 
               <FieldRow label="Value Proposition">
-                <Input placeholder="Reduce effort by 60%; Improve accuracy to 95%+" value={form.valueProposition} onChange={set("valueProposition")} />
+                <Input
+                  placeholder="Reduce effort by 60%; Improve accuracy to 95%+"
+                  value={form.valueProposition}
+                  onChange={set("valueProposition")}
+                />
               </FieldRow>
 
               <FieldRow label="Customer Pitch">
@@ -314,14 +391,30 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
               </FieldRow>
 
               <FieldRow label="Differentiators">
-                <Input placeholder="Pre-trained models; Fast deployment (<6 weeks)" value={form.differentiators} onChange={set("differentiators")} />
+                <Input
+                  placeholder="Pre-trained models; Fast deployment (<6 weeks)"
+                  value={form.differentiators}
+                  onChange={set("differentiators")}
+                />
               </FieldRow>
             </div>
 
             <DialogFooter className="pt-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
               <Button onClick={handleCreate} disabled={createIp.isPending}>
-                {createIp.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : <><PlusCircle className="w-4 h-4 mr-2" />Create IP</>}
+                {createIp.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="w-4 h-4 mr-2" />
+                    Create IP
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </TabsContent>
@@ -335,7 +428,8 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
                   Upload an Excel (.xlsx) or CSV file
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Each row becomes one IP entry. Required columns: <strong>name</strong>, <strong>description</strong>.
+                  Each row becomes one IP entry. Required columns:{" "}
+                  <strong>name</strong>, <strong>description</strong>.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 mt-1">
@@ -343,7 +437,11 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
                   <FileSpreadsheet className="w-4 h-4 mr-2" />
                   Download Template
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <UploadCloud className="w-4 h-4 mr-2" />
                   Select File
                 </Button>
@@ -366,9 +464,9 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
               <div className="rounded-lg border bg-card p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   {uploadResult.added > 0 ? (
-                    <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   )}
                   <span className="text-sm font-semibold">
                     {uploadResult.added} added, {uploadResult.skipped} skipped
@@ -376,19 +474,32 @@ export function CreateIpDialog({ open, onOpenChange }: CreateIpDialogProps) {
                 </div>
                 {uploadResult.errors.length > 0 && (
                   <ul className="text-xs text-destructive space-y-1 pl-6 list-disc">
-                    {uploadResult.errors.map((e, i) => <li key={i}>{e}</li>)}
+                    {uploadResult.errors.map((e, i) => (
+                      <li key={i}>{e}</li>
+                    ))}
                   </ul>
                 )}
               </div>
             )}
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-              <Button onClick={handleUpload} disabled={uploadIp.isPending || !uploadFile}>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Close
+              </Button>
+              <Button
+                onClick={handleUpload}
+                disabled={uploadIp.isPending || !uploadFile}
+              >
                 {uploadIp.isPending ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Uploading...</>
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
                 ) : (
-                  <><UploadCloud className="w-4 h-4 mr-2" />Upload & Import</>
+                  <>
+                    <UploadCloud className="w-4 h-4 mr-2" />
+                    Upload & Import
+                  </>
                 )}
               </Button>
             </DialogFooter>

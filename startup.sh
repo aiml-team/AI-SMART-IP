@@ -6,20 +6,29 @@
 # =============================================================================
 set -euo pipefail
 
+# Always run from the directory this script lives in (Azure's CWD is unreliable).
+cd "$(dirname "$0")"
+
 echo "[startup] Node: $(node -v)"
+echo "[startup] NPM : $(npm -v)"
 echo "[startup] PWD : $(pwd)"
+echo "[startup] User: $(whoami)"
+
+# Persist pnpm store across restarts to speed up cold starts.
+export PNPM_HOME="${PNPM_HOME:-/home/.pnpm}"
+export PATH="$PNPM_HOME:$PATH"
 
 # Azure deploys the repo to /home/site/wwwroot. Make sure pnpm is available.
 if ! command -v pnpm >/dev/null 2>&1; then
   echo "[startup] Installing pnpm globally..."
-  npm install -g pnpm@9
+  npm install -g pnpm@9 --silent
 fi
+echo "[startup] pnpm: $(pnpm -v)"
 
-# Install dependencies if node_modules is missing (Oryx usually does this,
-# but this guard handles zip-deploy / partial-build scenarios).
-if [ ! -d "node_modules" ]; then
-  echo "[startup] Running pnpm install --prod=false ..."
-  pnpm install --frozen-lockfile
+# Install dependencies if node_modules is missing (handles fresh deploys).
+if [ ! -d "node_modules" ] || [ ! -d "artifacts/api-server/node_modules" ]; then
+  echo "[startup] Running pnpm install --frozen-lockfile ..."
+  pnpm install --frozen-lockfile --prefer-offline
 fi
 
 # Build api-server and frontend if dist outputs are missing.
