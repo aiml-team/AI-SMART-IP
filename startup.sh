@@ -1,70 +1,31 @@
 #!/usr/bin/env bash
-# =============================================================================
-# Azure Web App startup script for AI-IP-Recommender
-# Set this as the Web App "Startup Command":
-#     bash startup.sh
-# =============================================================================
 set -euo pipefail
 
-# Always run from the directory this script lives in (Azure's CWD is unreliable).
 cd "$(dirname "$0")"
 
+export PORT="${PORT:-8080}"
+export NODE_ENV="${NODE_ENV:-production}"
+
 echo "[startup] Node: $(node -v)"
-echo "[startup] NPM : $(npm -v)"
 echo "[startup] PWD : $(pwd)"
-echo "[startup] User: $(whoami)"
+echo "[startup] PORT: ${PORT}"
 
-# Persist pnpm store across restarts to speed up cold starts.
-export PNPM_HOME="${PNPM_HOME:-/home/.pnpm}"
-export PATH="$PNPM_HOME:$PATH"
-
-# Azure deploys the repo to /home/site/wwwroot. The lockfile and
-# pnpm-workspace.yaml require pnpm 10+ (overrides live in pnpm-workspace.yaml
-# and we use minimumReleaseAge / allowBuilds keys). Force pnpm 10 even if
-# Oryx pre-installed an older pnpm.
-REQUIRED_PNPM_MAJOR=10
-INSTALL_PNPM=1
-if command -v pnpm >/dev/null 2>&1; then
-  CURRENT_PNPM_MAJOR="$(pnpm -v | cut -d. -f1)"
-  if [ "${CURRENT_PNPM_MAJOR}" = "${REQUIRED_PNPM_MAJOR}" ]; then
-    INSTALL_PNPM=0
-  fi
-fi
-if [ "${INSTALL_PNPM}" = "1" ]; then
-  echo "[startup] Installing pnpm@${REQUIRED_PNPM_MAJOR} globally..."
-  npm install -g pnpm@${REQUIRED_PNPM_MAJOR} --silent
-fi
-echo "[startup] pnpm: $(pnpm -v)"
-
-# Install dependencies if node_modules is missing (handles fresh deploys).
-if [ ! -d "node_modules" ] || [ ! -d "artifacts/api-server/node_modules" ]; then
-  echo "[startup] Running pnpm install --frozen-lockfile ..."
-  if ! pnpm install --frozen-lockfile --prefer-offline; then
-    echo "[startup] Frozen install failed; retrying with --no-frozen-lockfile" >&2
-    pnpm install --no-frozen-lockfile --prefer-offline
-  fi
-fi
-
-# Build api-server and frontend if dist outputs are missing.
 if [ ! -f "artifacts/api-server/dist/index.mjs" ]; then
-  echo "[startup] Building api-server..."
-  pnpm --filter @workspace/api-server run build
+  echo "[startup] ERROR: Missing artifacts/api-server/dist/index.mjs"
+  echo "[startup] Build api-server before deployment."
+  exit 1
 fi
 
 if [ ! -d "artifacts/ai-ip-copilot/dist/public" ]; then
-  echo "[startup] Building frontend..."
-  pnpm --filter @workspace/ai-ip-copilot run build
+  echo "[startup] ERROR: Missing artifacts/ai-ip-copilot/dist/public"
+  echo "[startup] Build frontend before deployment."
+  exit 1
 fi
 
-# Copy the built frontend next to the api-server dist so Express can serve it.
 echo "[startup] Staging frontend into api-server/public ..."
 rm -rf artifacts/api-server/public
 mkdir -p artifacts/api-server/public
 cp -R artifacts/ai-ip-copilot/dist/public/. artifacts/api-server/public/
-
-# Azure provides PORT; fall back to 8080 for local runs.
-export PORT="${PORT:-8080}"
-export NODE_ENV="${NODE_ENV:-production}"
 
 echo "[startup] Launching server on port ${PORT} ..."
 exec node --enable-source-maps artifacts/api-server/dist/index.mjs
