@@ -18,17 +18,31 @@ echo "[startup] User: $(whoami)"
 export PNPM_HOME="${PNPM_HOME:-/home/.pnpm}"
 export PATH="$PNPM_HOME:$PATH"
 
-# Azure deploys the repo to /home/site/wwwroot. Make sure pnpm is available.
-if ! command -v pnpm >/dev/null 2>&1; then
-  echo "[startup] Installing pnpm globally..."
-  npm install -g pnpm@9 --silent
+# Azure deploys the repo to /home/site/wwwroot. The lockfile and
+# pnpm-workspace.yaml require pnpm 10+ (overrides live in pnpm-workspace.yaml
+# and we use minimumReleaseAge / allowBuilds keys). Force pnpm 10 even if
+# Oryx pre-installed an older pnpm.
+REQUIRED_PNPM_MAJOR=10
+INSTALL_PNPM=1
+if command -v pnpm >/dev/null 2>&1; then
+  CURRENT_PNPM_MAJOR="$(pnpm -v | cut -d. -f1)"
+  if [ "${CURRENT_PNPM_MAJOR}" = "${REQUIRED_PNPM_MAJOR}" ]; then
+    INSTALL_PNPM=0
+  fi
+fi
+if [ "${INSTALL_PNPM}" = "1" ]; then
+  echo "[startup] Installing pnpm@${REQUIRED_PNPM_MAJOR} globally..."
+  npm install -g pnpm@${REQUIRED_PNPM_MAJOR} --silent
 fi
 echo "[startup] pnpm: $(pnpm -v)"
 
 # Install dependencies if node_modules is missing (handles fresh deploys).
 if [ ! -d "node_modules" ] || [ ! -d "artifacts/api-server/node_modules" ]; then
   echo "[startup] Running pnpm install --frozen-lockfile ..."
-  pnpm install --frozen-lockfile --prefer-offline
+  if ! pnpm install --no-frozen-lockfile --prefer-offline; then
+    echo "[startup] Frozen install failed; retrying with --no-frozen-lockfile" >&2
+    pnpm install --no-frozen-lockfile --prefer-offline
+  fi
 fi
 
 # Build api-server and frontend if dist outputs are missing.
