@@ -1,64 +1,30 @@
 # =============================================================================
-# AI-IP-Recommender — Deployment / Setup Requirements
+# AI-IP-Recommender (Smart IP Advisor) — Python FastAPI backend
 # =============================================================================
-# NOTE: This is a Node.js / TypeScript project (NOT Python).
-# Node.js does not use requirements.txt for installing dependencies.
-# Real dependencies are declared in package.json files and installed with pnpm.
-# This file is kept as a human-readable summary of prerequisites.
-# =============================================================================
-
-# ── System prerequisites (must be present on the host / Azure Web App) ───────
-# Node.js     >= 20.x   (Node 22 LTS recommended; this repo targets Node 24)
-# pnpm        >= 9.x    (installed via:  npm install -g pnpm)
-# Git                   (for cloning the repo)
-
-# ── Project-level package managers ───────────────────────────────────────────
-# pnpm workspaces (monorepo) — root package.json defines the workspace.
-# Lockfile: pnpm-lock.yaml  (commit this; Azure will restore from it)
-
-# ── Backend (artifacts/api-server) — runtime dependencies ────────────────────
-# Installed automatically by `pnpm install` from package.json. Listed here
-# only for visibility:
-#   express ^5
-#   cors ^2
-#   cookie-parser ^1.4.7
-#   multer ^2.1.1
-#   pino ^9
-#   pino-http ^10
-#   xlsx ^0.18.5
-#   drizzle-orm (catalog)
-#   @workspace/api-zod                 (workspace package)
-#   @workspace/db                      (workspace package)
-#   @workspace/integrations-openai-ai-server  (workspace package)
+# Install:
+#     pip install -r requirements.txt
 #
-# Build-time tools:
-#   esbuild ^0.27.3
-#   esbuild-plugin-pino ^2.3.3
-#   typescript ~5.9.2
-#   pino-pretty ^13
+# Run:
+#     uvicorn main:app --reload --port 8000
+# =============================================================================
 
-# ── Frontend (artifacts/ai-ip-copilot) — build dependencies ──────────────────
-# Built into static assets with Vite. Key libs:
-#   react, react-dom, vite, @vitejs/plugin-react
-#   @tanstack/react-query, wouter, zod
-#   tailwindcss + @tailwindcss/vite
-#   @radix-ui/* component primitives
-#   lucide-react, framer-motion, recharts, sonner
+# Web framework + ASGI server
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
 
-# ── Required environment variables (Azure → Configuration → App settings) ────
-# PORT                                  → Azure sets this automatically
-# NODE_ENV                              = production
-# AI_INTEGRATIONS_OPENAI_API_KEY        = <your Azure OpenAI key>
-# AI_INTEGRATIONS_OPENAI_BASE_URL       = <your Azure OpenAI endpoint>
-# WEBSITE_NODE_DEFAULT_VERSION          = ~22         (or ~20)
-# SCM_DO_BUILD_DURING_DEPLOYMENT        = true        (let Oryx build on deploy)
-# ENABLE_ORYX_BUILD                     = true
+# Request body / form / file handling
+python-multipart==0.0.20
 
-# ── Install + build (run locally before pushing, OR let Oryx do it) ──────────
-#   npm install -g pnpm
-#   pnpm install --frozen-lockfile
-#   pnpm -r run build
+# Environment variable loading (.env)
+python-dotenv==1.0.1
 
-# ── Azure Web App startup command (paste into Azure Portal) ──────────────────
-#   bash startup.sh
-# (see startup.sh in repo root)
+# Data validation (already pulled in by FastAPI, pinned for clarity)
+pydantic==2.10.4
+
+# Azure OpenAI client
+openai==1.59.6
+
+# Excel parsing (.xlsx / .xls)
+openpyxl==3.1.5
+xlrd==2.0.1
+pandas==2.2.3
