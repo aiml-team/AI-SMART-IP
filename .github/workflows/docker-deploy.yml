@@ -11,12 +11,12 @@
 # Optional secrets:
 #   AZURE_WEBAPP_SLOT                — deployment slot (default: production)
 # =============================================================================
-name: Docker - Build & Deploy to Azure Web App
+name: (disabled) Docker - Build & Deploy to Azure Web App
 
+# Disabled — the project ships via the zip-deploy workflow
+# (.github/workflows/main_smart-ip.yml). Re-enable only if you intentionally
+# switch the Web App back to container mode.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 env:

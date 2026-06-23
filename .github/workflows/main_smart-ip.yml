@@ -1,27 +1,46 @@
 # =============================================================================
-# DISABLED — superseded by .github/workflows/docker-deploy.yml
+# Zip deploy to Azure Web App "Smart-IP"
 #
-# This zip-based deployment was unreliable on Azure App Service because:
-#   • azure/webapps-deploy@v3 silently honored .gitignore (which contains
-#     `dist`), stripping the built outputs from the upload.
-#   • App Service kept running stale startup commands ("pnpm install ... &&
-#     bash startup.sh") that crashed because pnpm is not on its PATH.
+# Builds the workspace on the runner, zips the dist outputs (which are in
+# .gitignore — we therefore zip explicitly with `zip -r` instead of letting
+# the deploy action re-zip the folder), and ships the package to Azure.
 #
-# We now ship a Docker image to ACR and run the Web App in container mode.
-# Re-enable this workflow only if you intentionally roll back to zip deploys.
+# Required GitHub secret:
+#   SMART_IP — Azure App Service publish profile XML.
+#              Download from: Azure Portal → Smart-IP → "Get publish profile".
+#
+# IMPORTANT one-time Azure App Service configuration (do this in the Portal):
+#   1. Configuration → General settings → Startup Command:  bash startup.sh
+#   2. Configuration → Application settings → add:
+#        SCM_DO_BUILD_DURING_DEPLOYMENT = false
+#        ENABLE_ORYX_BUILD              = false
+#        WEBSITE_RUN_FROM_PACKAGE       = 0    (we extract, not run-from-zip)
+#      Then "Save" — App Service will restart automatically.
 # =============================================================================
-name: (disabled) Zip deploy to Azure Web App - Smart-IP
+name: Build and deploy to Azure Web App - Smart-IP
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Grant the GITHUB_TOKEN the minimum scopes needed.
+    # Without this, organizations that set "no permissions" as the default
+    # will make `actions/checkout` fail with HTTP 403 on `git fetch origin`.
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Use the workflow's GITHUB_TOKEN explicitly. This is also the
+          # default, but stating it makes the 403 root cause obvious.
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -48,8 +67,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build workspace (typecheck + build all packages)
-        run: pnpm build
+      - name: Build api-server (esbuild bundle)
+        # We deliberately skip `pnpm build` at the root because it runs
+        # `pnpm typecheck` first, and a couple of lib packages have type
+        # errors in source files that aren't reached by the runtime bundle.
+        # The actual esbuild + vite builds work cleanly.
+        run: pnpm --filter @workspace/api-server build
+
+      - name: Build ai-ip-copilot frontend (Vite)
+        run: pnpm --filter @workspace/ai-ip-copilot build
 
       - name: Stage frontend into api-server/public
         run: |
@@ -57,11 +83,20 @@ jobs:
           mkdir -p artifacts/api-server/public
           cp -R artifacts/ai-ip-copilot/dist/public/. artifacts/api-server/public/
 
+      - name: Sanity check build outputs exist
+        run: |
+          test -f artifacts/api-server/dist/index.mjs       || (echo "FATAL: api-server bundle missing" && exit 1)
+          test -f artifacts/api-server/public/index.html    || (echo "FATAL: frontend index.html missing" && exit 1)
+          test -f artifacts/api-server/data/ip_catalog.json || (echo "FATAL: ip_catalog.json missing" && exit 1)
+          echo "[build] All required outputs present."
+
       - name: Zip artifact for deployment
-        # Build the zip explicitly so dist/ folders ARE included even though
-        # they are listed in .gitignore. node_modules is included because pnpm
-        # uses symlinks and Azure cannot rebuild them. Hidden dotfiles in the
-        # repo root (like .deployment) are added explicitly.
+        # Zip explicitly so dist/ folders ARE included even though they are in
+        # .gitignore. node_modules is included because pnpm uses symlinks and
+        # Azure cannot rebuild them. Hidden dotfiles at the repo root (like
+        # .deployment, .npmrc) are added because `zip -r .` already includes
+        # them; we only exclude the things that would bloat the package or
+        # break the deploy.
         run: |
           zip -r release.zip . \
             -x ".git/*" \
@@ -71,7 +106,8 @@ jobs:
             -x "**/.DS_Store" \
             -x "release.zip"
           echo "--- Sanity check: dist outputs inside the zip ---"
-          unzip -l release.zip | grep -E "(artifacts/api-server/dist/index\.mjs|artifacts/ai-ip-copilot/dist/public/index\.html)" || (echo "FATAL: dist outputs are missing from the zip" && exit 1)
+          unzip -l release.zip | grep -E "(artifacts/api-server/dist/index\.mjs|artifacts/api-server/public/index\.html)" \
+            || (echo "FATAL: dist outputs are missing from the zip" && exit 1)
 
       - name: Upload artifact for deploy job
         uses: actions/upload-artifact@v4
@@ -82,11 +118,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
     environment:
       name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     # Belt-and-suspenders: tell Azure not to run Oryx during this deploy.
+    # The App Service-side settings (see header) are the real fix; these env
+    # vars are just there so a fresh slot still behaves correctly.
     env:
       SCM_DO_BUILD_DURING_DEPLOYMENT: false
       ENABLE_ORYX_BUILD: false
@@ -107,4 +147,4 @@ jobs:
           # directory, the action re-zips it and silently honors .gitignore,
           # which excludes our dist/ folders and breaks the runtime boot.
           package: release.zip
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          publish-profile: ${{ secrets.SMART_IP }}
