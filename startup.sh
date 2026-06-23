@@ -23,15 +23,19 @@ else
   mkdir -p artifacts/api-server/public
 fi
 
-# ✅ ADDED: Install dependencies
+# ✅ Install pnpm (FIX)
+echo "[startup] Installing pnpm..."
+npm install -g pnpm
+
+# ✅ Install dependencies
 echo "[startup] Installing dependencies..."
 pnpm install
 
-# ✅ ADDED: Build project
+# ✅ Build project
 echo "[startup] Building API server..."
 pnpm --filter api-server build || pnpm run build
 
-# ✅ EXISTING CHECK (keep as-is)
+# ✅ Check build output
 if [ ! -f "artifacts/api-server/dist/index.mjs" ]; then
   echo "[startup] FATAL: artifacts/api-server/dist/index.mjs is missing."
   echo "[startup] Listing /home/site/wwwroot for debugging:"
