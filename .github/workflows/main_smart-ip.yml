@@ -1,14 +1,18 @@
 # =============================================================================
-# Build + deploy AI-IP-Recommender to Azure Web App "Smart-IP"
-# This workflow uses pnpm (the repo's required package manager) and disables
-# Oryx so Azure does not try to re-run `npm install` on the server.
+# DISABLED — superseded by .github/workflows/docker-deploy.yml
+#
+# This zip-based deployment was unreliable on Azure App Service because:
+#   • azure/webapps-deploy@v3 silently honored .gitignore (which contains
+#     `dist`), stripping the built outputs from the upload.
+#   • App Service kept running stale startup commands ("pnpm install ... &&
+#     bash startup.sh") that crashed because pnpm is not on its PATH.
+#
+# We now ship a Docker image to ACR and run the Web App in container mode.
+# Re-enable this workflow only if you intentionally roll back to zip deploys.
 # =============================================================================
-name: Build and deploy Node.js app to Azure Web App - Smart-IP
+name: (disabled) Zip deploy to Azure Web App - Smart-IP
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
