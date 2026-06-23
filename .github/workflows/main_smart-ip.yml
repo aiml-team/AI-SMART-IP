@@ -54,15 +54,20 @@ jobs:
           cp -R artifacts/ai-ip-copilot/dist/public/. artifacts/api-server/public/
 
       - name: Zip artifact for deployment
-        # Excludes that keep the upload small. node_modules is included because
-        # pnpm uses symlinks and Azure cannot rebuild them.
+        # Build the zip explicitly so dist/ folders ARE included even though
+        # they are listed in .gitignore. node_modules is included because pnpm
+        # uses symlinks and Azure cannot rebuild them. Hidden dotfiles in the
+        # repo root (like .deployment) are added explicitly.
         run: |
           zip -r release.zip . \
             -x ".git/*" \
             -x ".github/*" \
             -x "**/.turbo/*" \
             -x "**/*.log" \
-            -x "**/.DS_Store"
+            -x "**/.DS_Store" \
+            -x "release.zip"
+          echo "--- Sanity check: dist outputs inside the zip ---"
+          unzip -l release.zip | grep -E "(artifacts/api-server/dist/index\.mjs|artifacts/ai-ip-copilot/dist/public/index\.html)" || (echo "FATAL: dist outputs are missing from the zip" && exit 1)
 
       - name: Upload artifact for deploy job
         uses: actions/upload-artifact@v4
@@ -88,17 +93,14 @@ jobs:
         with:
           name: node-app
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: "Smart-IP"
           slot-name: "Production"
-          package: .
-          # TODO: replace the secret name below with the actual one from
-          # GitHub → Settings → Secrets and variables → Actions.
-          # It typically looks like AZUREAPPSERVICE_PUBLISHPROFILE_XXXXXXXX
+          # IMPORTANT: point at the zip file, NOT the directory. When given a
+          # directory, the action re-zips it and silently honors .gitignore,
+          # which excludes our dist/ folders and breaks the runtime boot.
+          package: release.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
