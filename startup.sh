@@ -39,7 +39,7 @@ echo "[startup] pnpm: $(pnpm -v)"
 # Install dependencies if node_modules is missing (handles fresh deploys).
 if [ ! -d "node_modules" ] || [ ! -d "artifacts/api-server/node_modules" ]; then
   echo "[startup] Running pnpm install --frozen-lockfile ..."
-  if ! pnpm install --no-frozen-lockfile --prefer-offline; then
+  if ! pnpm install --frozen-lockfile --prefer-offline; then
     echo "[startup] Frozen install failed; retrying with --no-frozen-lockfile" >&2
     pnpm install --no-frozen-lockfile --prefer-offline
   fi
