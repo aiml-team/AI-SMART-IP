@@ -33,25 +33,22 @@ else
 fi
 
 echo "[startup] Installing dependencies..."
-pnpm install --frozen-lockfile
+pnpm install --no-frozen-lockfile
 
-echo "[startup] Building API server..."
+echo "[startup] Building API server directly from artifacts/api-server..."
 
-if pnpm --filter api-server build; then
-  echo "[startup] Built using pnpm --filter api-server build"
-elif [ -f "artifacts/api-server/package.json" ]; then
-  echo "[startup] Trying build from artifacts/api-server package..."
+if [ -f "artifacts/api-server/build.mjs" ]; then
   cd artifacts/api-server
-  pnpm run build || node build.mjs
+  node build.mjs
   cd ../..
-elif [ -f "artifacts/api-server/build.mjs" ]; then
-  echo "[startup] Trying direct build.mjs..."
-  node artifacts/api-server/build.mjs
 else
-  echo "[startup] ERROR: No valid build command found."
+  echo "[startup] ERROR: artifacts/api-server/build.mjs not found."
+  echo "[startup] Listing artifacts/api-server:"
+  ls -la artifacts/api-server 2>/dev/null || true
   exit 1
 fi
 
+echo "[startup] Checking build output..."
 if [ ! -f "artifacts/api-server/dist/index.mjs" ]; then
   echo "[startup] FATAL: artifacts/api-server/dist/index.mjs is missing after build."
   echo "[startup] Listing /home/site/wwwroot:"
@@ -65,3 +62,4 @@ fi
 
 echo "[startup] Launching server on port ${PORT} ..."
 exec node --enable-source-maps artifacts/api-server/dist/index.mjs
+``
